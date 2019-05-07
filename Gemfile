@@ -8,3 +8,4 @@ gem "sinatra", '~>1.4.7'
 gem "sinatra-contrib"
 gem 'rack-test'
 gem 'minitest'
+gem 'redcarpet'

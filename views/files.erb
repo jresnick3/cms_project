@@ -1,7 +1,10 @@
-<p><%= session.delete(:error) %></p>
+<p><%= session.delete(:message) %></p>
 
 <ul>
 <% @content.each do |file| %>
-  <a href="./<%= file %>"><li><%= file %></li></a>
+  <li>
+    <a href="./<%= file %>"><%= file %></a>
+    <a href="/<%= file %>/edit">Edit</a>
+  </li>
 <% end %>
 </ul>

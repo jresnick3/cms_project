@@ -15,6 +15,7 @@ GEM
       rack
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
+    redcarpet (3.4.0)
     sinatra (1.4.8)
       rack (~> 1.5)
       rack-protection (~> 1.4)
@@ -36,6 +37,7 @@ DEPENDENCIES
   minitest
   pry
   rack-test
+  redcarpet
   sinatra (~> 1.4.7)
   sinatra-contrib
 
