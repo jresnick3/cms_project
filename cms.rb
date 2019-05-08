@@ -30,7 +30,7 @@ helpers do
 end
 
 def data_path
-  if ENV["RACK-ENV"] = 'test'
+  if ENV["RACK_ENV"] == "test"
     File.expand_path("../test/data", __FILE__)
   else
     File.expand_path("../data", __FILE__)

@@ -6,7 +6,7 @@ ENV["RACK_ENV"] = "test"
 require "minitest/autorun"
 require "rack/test"
 
-require_relative "./cms"
+require_relative "../cms"
 
 class CMSTest < Minitest::Test
   include Rack::Test::Methods
@@ -16,7 +16,7 @@ class CMSTest < Minitest::Test
   end
 
   def teardown
-    FileUtils.rm_p(data_path)
+    FileUtils.rm_rf(data_path)
   end
 
   def create_document(name, content = "")
@@ -30,7 +30,9 @@ class CMSTest < Minitest::Test
   end
 
   def test_file_display
-    create_document # continue here
+    create_document "about.md"
+    create_document "changes.txt"
+    create_document "history.txt"
     get "/"
     assert_equal(200, last_response.status)
     assert_equal("text/html;charset=utf-8", last_response["Content-Type"])
@@ -40,6 +42,7 @@ class CMSTest < Minitest::Test
   end
 
   def test_content_display
+    create_document("history.txt", "1993 - Yukihiro Matsumoto dreams up Ruby.")
     get "/history.txt"
     assert_equal(200, last_response.status)
     assert_equal('text/plain', last_response["Content-Type"])
@@ -60,6 +63,7 @@ class CMSTest < Minitest::Test
   end
 
   def test_markdown_display
+    create_document("about.md", "<h1>Ruby is...</h1>")
     get '/about.md'
     assert_equal(200, last_response.status)
     refute_includes(last_response.body, '#')
@@ -68,14 +72,14 @@ class CMSTest < Minitest::Test
   end
 
   def test_edit_page
+    create_document "changes.txt"
     get '/changes.txt/edit'
     assert_equal(200, last_response.status)
-    assert_includes(last_response.body, "<h4>Edit content of changes.txt</h4>")
+    assert_includes(last_response.body, "Edit content of changes.txt")
   end
 
 
   def test_edit_content
-
     post '/changes.txt/edit', content: "new content"
     assert_equal(302, last_response.status)
 
