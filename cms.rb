@@ -27,6 +27,19 @@ helpers do
     markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML)
     markdown.render(content)
   end
+
+  def valid_name?(name)
+    case
+    when name.size == 0
+      session[:message] = 'A name is required.'
+      false
+    when File.extname(name).empty?
+      session[:message] = 'Please specify file type.'
+      false
+    else
+      session[:message] = name + " was created."
+    end
+  end
 end
 
 def data_path
@@ -42,7 +55,23 @@ get '/' do
   @content = Dir.glob(pattern).map do |path|
     File.basename(path)
   end
-  erb :files
+  erb :files, layout: :layout
+end
+
+get '/new' do
+  erb :new_document, layout: :layout
+end
+
+post '/new' do
+  name = params[:document_name]
+  if valid_name?(name)
+    pattern = File.join(data_path, name)
+    File.write(pattern, '')
+    redirect '/'
+  else
+    status 422
+    erb :new_document
+  end
 end
 
 get '/:file' do

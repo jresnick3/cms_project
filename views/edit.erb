@@ -2,7 +2,7 @@
 <form action="/<%= params[:file] %>/edit" method="post">
   <label for="content"> Edit content of <%= params[:file] %>:</label>
   <div>
-    <textarea name="content" id="content" rows="20" cols="100" value="<%= @content %>"></textarea>
+    <textarea name="content" id="content" rows="20" cols="100" value="<%= @content %>"><%= @content %></textarea>
   </div>
   <button type="submit">Save Changes</button>
 </form>

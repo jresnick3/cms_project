@@ -6,7 +6,7 @@ ENV["RACK_ENV"] = "test"
 require "minitest/autorun"
 require "rack/test"
 
-require_relative "../cms"
+require_relative "./cms"
 
 class CMSTest < Minitest::Test
   include Rack::Test::Methods
@@ -90,5 +90,38 @@ class CMSTest < Minitest::Test
     get '/changes.txt'
     assert_equal(200, last_response.status)
     assert_includes(last_response.body, "new content", )
+  end
+
+  def test_new_doc_page
+    get '/new'
+    assert_equal(200, last_response.status)
+    assert_includes(last_response.body, '<input')
+    assert_includes(last_response.body, 'type="submit"')
+  end
+
+  def test_adding_valid_doc
+    post '/new', document_name: "test1.txt"
+    assert_equal(302, last_response.status)
+
+    get last_response["Location"]
+    assert_equal(200, last_response.status)
+    assert_includes(last_response.body, 'test1.txt was created.')
+
+    get '/'
+    assert_includes(last_response.body, 'test1.txt')
+  end
+
+  def test_adding_noname_doc
+    post '/new', document_name: ""
+    assert_equal(422, last_response.status)
+    assert_includes(last_response.body, 'A name is required.')
+    assert_includes(last_response.body, 'Add a new document:')
+  end
+
+  def test_adding_noextension_doc
+    post '/new', document_name: "test1"
+    assert_equal(422, last_response.status)
+    assert_includes(last_response.body, 'Please specify file type.')
+    assert_includes(last_response.body, 'Add a new document:')
   end
 end

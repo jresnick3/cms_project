@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <title>CMS File Management System</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/stylesheets/application.css">
+  </head>
+  <body>
+    <header>
+      <% if session[:message] %>
+      <div class="message" ><%= session.delete(:message) %></div>
+      <% end %>
+    </header>
+    <%= yield %>
+  </body>
+</html>
