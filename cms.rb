@@ -42,6 +42,17 @@ helpers do
   end
 end
 
+def signed_in?
+  session.key?(:username)
+end
+
+def require_signed_in_user
+  unless signed_in?
+    session[:message] = "You must be signed in to do that."
+    redirect '/'
+  end
+end
+
 def data_path
   if ENV["RACK_ENV"] == "test"
     File.expand_path("../test/data", __FILE__)
@@ -55,14 +66,39 @@ get '/' do
   @content = Dir.glob(pattern).map do |path|
     File.basename(path)
   end
-  erb :files, layout: :layout
+  erb :index, layout: :layout
 end
 
+get '/users/signin' do
+  erb :signin
+end
+
+post '/users/signin' do
+  if params[:username] == "admin" && params[:password] == "secret"
+    session[:username] = 'admin'
+    session[:message] = "Welcome!"
+    redirect '/'
+  else
+    status 422
+    session[:message] = "Invalid Credentails"
+    erb :signin
+  end
+end
+
+post '/users/signout' do
+  session.delete(:username)
+  session[:message] = "You have been signed out."
+  redirect '/'
+end
+
+
 get '/new' do
+  require_signed_in_user
   erb :new_document, layout: :layout
 end
 
 post '/new' do
+  require_signed_in_user
   name = params[:document_name]
   if valid_name?(name)
     pattern = File.join(data_path, name)
@@ -85,15 +121,25 @@ get '/:file' do
 end
 
 get '/:file/edit' do
+  require_signed_in_user
   @file_name = File.join(data_path, params[:file])
   @content = File.read(@file_name)
   erb :edit
 end
 
 post '/:file/edit' do
+  require_signed_in_user
   file_name = File.join(data_path, params[:file])
   @new_content = params[:content]
   File.write(file_name, @new_content)
   session[:message] = "#{params[:file]} has been updated."
   redirect "/"
+end
+
+post '/:file/delete' do
+  require_signed_in_user
+  file_name = File.join(data_path, params[:file])
+  File.delete(file_name)
+  session[:message] = "#{params[:file]} was deleted."
+  redirect '/'
 end
