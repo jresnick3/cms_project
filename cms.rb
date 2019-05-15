@@ -5,6 +5,8 @@ require "tilt/erubis"
 require "rack"
 require "sinatra/content_for"
 require "redcarpet"
+require "yaml"
+require "bcrypt"
 
 configure do
   enable :sessions
@@ -61,6 +63,26 @@ def data_path
   end
 end
 
+def load_user_credentials
+  credentials_path = if ENV["RACK_ENV"] == "test"
+    File.expand_path("../test/users.yml", __FILE__)
+  else
+    File.expand_path("../users.yml", __FILE__)
+  end
+  YAML.load_file(credentials_path)
+end
+
+def valid_credentials?(username, password)
+  users = load_user_credentials
+
+  if users.key?(username)
+    stored_password = BCrypt::Password.new(users[username])
+    stored_password == password
+  else
+    false
+  end
+end
+
 get '/' do
   pattern = File.join(data_path, "*")
   @content = Dir.glob(pattern).map do |path|
@@ -74,8 +96,9 @@ get '/users/signin' do
 end
 
 post '/users/signin' do
-  if params[:username] == "admin" && params[:password] == "secret"
-    session[:username] = 'admin'
+  username = params[:username]
+  if valid_credentials?(username, params[:password])
+    session[:username] = username
     session[:message] = "Welcome!"
     redirect '/'
   else

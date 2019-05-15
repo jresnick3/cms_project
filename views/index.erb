@@ -22,3 +22,9 @@
 <% else %>
   <p class="user-status"><a href="/users/signin">Sign In</a></p>
 <% end %>
+
+<% if session[:username] == 'admin' %>
+  <form method="post" action="/configuration.yml/edit">
+    <button type="submit">Edit user list</button>
+  </form>
+<% end %>
